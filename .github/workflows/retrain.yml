@@ -1,0 +1,30 @@
+name: Retrain & Build Docker
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install MLflow
+        run: pip install mlflow
+
+      - name: Run MLflow Project
+        run: mlflow run MLProject
+
+      - name: Login Docker Hub
+        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+      - name: Build Docker Image
+        run: mlflow build-docker -m runs:/latest/model -n ${{ secrets.DOCKER_USER }}/telco-offer-ml
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USER }}/telco-offer-ml
