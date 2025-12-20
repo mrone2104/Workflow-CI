@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Conda environment (WAJIB karena pakai conda.yaml)
+      # 2. Setup Conda
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -28,17 +28,24 @@ jobs:
           cd MLProject
           mlflow run .
 
-      # 4. Login Docker Hub (PAKAI SECRET YANG BENAR)
+      # 4. Login Docker Hub
       - name: Login Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        shell: bash -l {0}
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+            -u "${{ secrets.DOCKERHUB_USERNAME }}" \
+            --password-stdin
 
-      # 5. Build Docker Image dari MLflow
+      # 5. Build Docker Image (INI YANG ERROR TADI)
       - name: Build Docker Image
+        shell: bash -l {0}
         run: |
           mlflow build-docker \
             -m runs:/latest/model \
             -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
 
-      # 6. Push Docker Image ke Docker Hub
+      # 6. Push Docker Image
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
+        shell: bash -l {0}
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
