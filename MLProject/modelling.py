@@ -34,9 +34,12 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # =============================
-# 4. MLFLOW CONFIG
+# 4. MLFLOW AUTOLOG
 # =============================
-mlflow.set_experiment("Telco_Offer_Basic")
+# PENTING:
+# - JANGAN pakai mlflow.start_run()
+# - JANGAN pakai mlflow.set_experiment()
+# karena lifecycle run diatur oleh `mlflow run`
 mlflow.sklearn.autolog()
 
 # =============================
@@ -65,6 +68,7 @@ f1 = f1_score(y_test, y_pred, average="macro")
 # =============================
 # 7. MANUAL LOGGING (TAMBAHAN)
 # =============================
+# Ini AMAN karena run sudah dibuat oleh `mlflow run`
 mlflow.log_metric("accuracy_manual", acc)
 mlflow.log_metric("macro_f1_manual", f1)
 
