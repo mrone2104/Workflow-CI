@@ -7,26 +7,38 @@ on:
 jobs:
   retrain:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: conda-incubator/setup-miniconda@v3
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Conda environment (WAJIB karena pakai conda.yaml)
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: MLProject/conda.yaml
           activate-environment: mlflow-env
           auto-activate-base: false
 
+      # 3. Run MLflow Project
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
           cd MLProject
           mlflow run .
 
+      # 4. Login Docker Hub (PAKAI SECRET YANG BENAR)
       - name: Login Docker Hub
-        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
+      # 5. Build Docker Image dari MLflow
       - name: Build Docker Image
-        run: mlflow build-docker -m runs:/latest/model -n ${{ secrets.DOCKER_USER }}/telco-offer-ml
+        run: |
+          mlflow build-docker \
+            -m runs:/latest/model \
+            -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
 
+      # 6. Push Docker Image ke Docker Hub
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USER }}/telco-offer-ml
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
