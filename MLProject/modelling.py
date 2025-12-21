@@ -66,9 +66,8 @@ acc = accuracy_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred, average="macro")
 
 # =============================
-# 7. MANUAL LOGGING (TAMBAHAN)
+# 7. MANUAL LOGGING
 # =============================
-# Ini AMAN karena run sudah dibuat oleh `mlflow run`
 mlflow.log_metric("accuracy_manual", acc)
 mlflow.log_metric("macro_f1_manual", f1)
 
@@ -77,3 +76,13 @@ mlflow.log_metric("macro_f1_manual", f1)
 # =============================
 print("Accuracy:", acc)
 print("Macro F1:", f1)
+
+# =============================
+# 9. SIMPAN RUN_ID (WAJIB UNTUK DOCKER)
+# =============================
+run_id = mlflow.active_run().info.run_id
+
+with open("run_id.txt", "w") as f:
+    f.write(run_id)
+
+print(f"RUN_ID={run_id}")
