@@ -1,6 +1,7 @@
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+import mlflow.xgboost
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 import xgboost as xgb
@@ -39,7 +40,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # PENTING:
 # - JANGAN pakai mlflow.start_run()
 # - JANGAN pakai mlflow.set_experiment()
-# karena lifecycle run diatur oleh `mlflow run`
+# lifecycle run diatur oleh `mlflow run`
 mlflow.sklearn.autolog()
 
 # =============================
@@ -58,7 +59,13 @@ model = xgb.XGBClassifier(
 model.fit(X_train, y_train)
 
 # =============================
-# 6. EVALUATION
+# 6. WAJIB: LOG MODEL KE ARTIFACT "model"
+# =============================
+# INI FIX UTAMA UNTUK ERROR BUILD DOCKER
+mlflow.xgboost.log_model(model, artifact_path="model")
+
+# =============================
+# 7. EVALUATION
 # =============================
 y_pred = model.predict(X_test)
 
@@ -66,19 +73,16 @@ acc = accuracy_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred, average="macro")
 
 # =============================
-# 7. MANUAL LOGGING
+# 8. MANUAL LOGGING
 # =============================
 mlflow.log_metric("accuracy_manual", acc)
 mlflow.log_metric("macro_f1_manual", f1)
 
-# =============================
-# 8. OUTPUT
-# =============================
 print("Accuracy:", acc)
 print("Macro F1:", f1)
 
 # =============================
-# 9. SIMPAN RUN_ID (WAJIB UNTUK DOCKER)
+# 9. SIMPAN RUN_ID (UNTUK DOCKER BUILD)
 # =============================
 run_id = mlflow.active_run().info.run_id
 
