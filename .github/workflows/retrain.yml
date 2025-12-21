@@ -21,14 +21,14 @@ jobs:
           activate-environment: mlflow-env
           auto-activate-base: false
 
-      # 3. Run MLflow Project (training + logging model)
+      # 3. Run MLflow Project
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
           cd MLProject
           mlflow run .
 
-      # 4. Login Docker Hub (pakai secret yang BENAR)
+      # 4. Login Docker Hub
       - name: Login Docker Hub
         shell: bash -l {0}
         run: |
@@ -36,15 +36,17 @@ jobs:
             -u "${{ secrets.DOCKERHUB_USERNAME }}" \
             --password-stdin
 
-      # 5. Build Docker Image (MLflow 3.x COMMAND)
+      # 5. Build Docker Image (PAKAI RUN_ID)
       - name: Build Docker Image
         shell: bash -l {0}
         run: |
+          cd MLProject
+          RUN_ID=$(cat run_id.txt)
           mlflow models build-docker \
-            -m runs:/latest/model \
+            -m runs:/$RUN_ID/model \
             -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
 
-      # 6. Push Docker Image ke Docker Hub
+      # 6. Push Docker Image
       - name: Push Docker Image
         shell: bash -l {0}
         run: |
