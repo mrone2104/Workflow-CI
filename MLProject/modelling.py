@@ -50,7 +50,7 @@ NUM_CLASS = y.nunique()
 # ==========================================
 # 4. TRAINING + LOGGING
 # ==========================================
-with mlflow.start_run(run_name="XGBoost_Basic"):
+# JANGAN start run manual
 
     # ----- MODEL
     model = xgb.XGBClassifier(
@@ -98,3 +98,4 @@ with mlflow.start_run(run_name="XGBoost_Basic"):
 # ==========================================
 # END OF FILE
 # ==========================================
+
