@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import mlflow
 import mlflow.xgboost
@@ -6,9 +7,19 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# JANGAN set_tracking_uri di MLflow Project
-# JANGAN set_experiment di MLflow Project
+# ==========================================
+# DETEKSI MODE: LOCAL vs MLFLOW PROJECT
+# ==========================================
+IS_PROJECT = os.environ.get("MLFLOW_RUN_ID") is not None
 
+if not IS_PROJECT:
+    # HANYA untuk VS Code / manual
+    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_experiment("Telco_Offer_Basic")
+
+# ==========================================
+# LOAD DATA
+# ==========================================
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -21,7 +32,11 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-with mlflow.start_run():
+# ==========================================
+# TRAINING
+# ==========================================
+with mlflow.start_run(run_name=None if IS_PROJECT else "XGBoost_Basic"):
+
     model = xgb.XGBClassifier(
         n_estimators=200,
         max_depth=7,
