@@ -6,6 +6,9 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
+# =====================
+# Load data
+# =====================
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -18,6 +21,9 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
+# =====================
+# MLflow training
+# =====================
 with mlflow.start_run():
 
     model = xgb.XGBClassifier(
@@ -39,11 +45,15 @@ with mlflow.start_run():
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("f1_score", f1)
 
-    # 🔴 SIMPAN MODEL KE FOLDER LOKAL
+    # =====================
+    # SIMPAN MODEL (WAJIB)
+    # =====================
     os.makedirs("model", exist_ok=True)
     model.save_model("model/model.json")
 
-    # 🔴 LOG SEBAGAI ARTIFACT (DIJAMIN MASUK mlruns)
+    # =====================
+    # LOG ARTIFACT (KUNCI)
+    # =====================
     mlflow.log_artifacts("model", artifact_path="model")
 
-    print("Model saved & logged as artifact")
+    print("Model saved & logged to MLflow")
