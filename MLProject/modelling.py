@@ -6,7 +6,7 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# Load data (preprocessed)
+# Load data
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -19,26 +19,29 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-model = xgb.XGBClassifier(
-    n_estimators=200,
-    max_depth=7,
-    learning_rate=0.05,
-    objective="multi:softprob",
-    num_class=NUM_CLASS,
-    eval_metric="mlogloss",
-    random_state=42
-)
+# 🔴 WAJIB ADA karena script dijalankan langsung
+with mlflow.start_run():
 
-model.fit(X_train, y_train)
+    model = xgb.XGBClassifier(
+        n_estimators=200,
+        max_depth=7,
+        learning_rate=0.05,
+        objective="multi:softprob",
+        num_class=NUM_CLASS,
+        eval_metric="mlogloss",
+        random_state=42
+    )
 
-y_pred = model.predict(X_test)
-acc = accuracy_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred, average="weighted")
+    model.fit(X_train, y_train)
 
-mlflow.log_metric("accuracy", acc)
-mlflow.log_metric("f1_score", f1)
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average="weighted")
 
-# PENTING: artifact_path HARUS "model"
-mlflow.xgboost.log_model(model, artifact_path="model")
+    mlflow.log_metric("accuracy", acc)
+    mlflow.log_metric("f1_score", f1)
 
-print("Training finished & model logged")
+    # 🔴 artifact_path HARUS "model"
+    mlflow.xgboost.log_model(model, artifact_path="model")
+
+    print("Model logged successfully")
