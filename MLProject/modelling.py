@@ -17,38 +17,39 @@ X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
 y = df["target_offer_encoded"].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+    X, y,
+    test_size=0.2,
+    stratify=y,
+    random_state=42
 )
 
 NUM_CLASS = y.nunique()
 
 
 # ======================================================
-# TRAIN & LOG WITH MLFLOW (CI-SAFE)
+# TRAIN & LOG (MLFLOW PROJECT SAFE)
 # ======================================================
-with mlflow.start_run():
+model = xgb.XGBClassifier(
+    n_estimators=200,
+    max_depth=7,
+    learning_rate=0.05,
+    objective="multi:softprob",
+    num_class=NUM_CLASS,
+    eval_metric="mlogloss",
+    random_state=42
+)
 
-    model = xgb.XGBClassifier(
-        n_estimators=200,
-        max_depth=7,
-        learning_rate=0.05,
-        objective="multi:softprob",
-        num_class=NUM_CLASS,
-        eval_metric="mlogloss",
-        random_state=42
-    )
+model.fit(X_train, y_train)
 
-    model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred, average="macro")
 
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="macro")
+mlflow.log_metric("accuracy", acc)
+mlflow.log_metric("macro_f1", f1)
 
-    mlflow.log_metric("accuracy", acc)
-    mlflow.log_metric("macro_f1", f1)
+# WAJIB untuk build docker
+mlflow.xgboost.log_model(model, artifact_path="model")
 
-    # WAJIB untuk Docker build
-    mlflow.xgboost.log_model(model, artifact_path="model")
-
-    print("Accuracy :", acc)
-    print("Macro F1 :", f1)
+print("Accuracy :", acc)
+print("Macro F1 :", f1)
