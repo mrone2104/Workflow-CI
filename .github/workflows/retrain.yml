@@ -26,11 +26,21 @@ jobs:
           cd MLProject
           python modelling.py
 
+      # DEBUG (opsional tapi sangat disarankan untuk bukti & troubleshooting)
+      - name: Debug MLflow artifacts
+        run: |
+          echo "=== TREE mlruns ==="
+          ls -R MLProject/mlruns || true
+
+      # Ambil PATH MODEL NYATA (TANPA RUN_ID, TANPA runs:/)
       - name: Get model path
         run: |
           MODEL_PATH=$(find MLProject/mlruns -type d -name model | head -n 1)
           echo "MODEL_PATH=$MODEL_PATH" >> $GITHUB_ENV
           echo "MODEL_PATH=$MODEL_PATH"
+          if [ -z "$MODEL_PATH" ]; then
+            echo "MODEL_PATH not found"; exit 1;
+          fi
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -41,7 +51,7 @@ jobs:
       - name: Build Docker image (MLflow)
         run: |
           mlflow models build-docker \
-            -m $MODEL_PATH \
+            -m "$MODEL_PATH" \
             -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml:latest
 
       - name: Push Docker image
