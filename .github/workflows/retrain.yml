@@ -61,14 +61,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    # ===============================
-    # Build Docker Image (FROM MODEL REGISTRY)
+        # ===============================
+    # Build Docker Image (CORRECT PATH)
     # ===============================
     - name: Build Docker Image with MLflow
       run: |
         mlflow models build-docker \
-          -m MLProject/mlruns/0/models/m-9b7809ca242e451aa039c8df628ab729/artifacts \
+          -m MLProject/mlruns/0/models/m-9b7809ca242e451aa039c8df628ab729 \
           -n riskinanda/telco-offer-ml
+
 
     # ===============================
     # Push Docker Image
