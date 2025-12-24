@@ -2,9 +2,13 @@ import pandas as pd
 import mlflow
 import mlflow.xgboost
 import xgboost as xgb
+
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
+# =====================
+# Load data (preprocessed)
+# =====================
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -17,7 +21,11 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-with mlflow.start_run() as run:
+# =====================
+# MLflow Training
+# =====================
+with mlflow.start_run():
+
     model = xgb.XGBClassifier(
         n_estimators=200,
         max_depth=7,
@@ -29,21 +37,15 @@ with mlflow.start_run() as run:
     )
 
     model.fit(X_train, y_train)
+
     y_pred = model.predict(X_test)
 
     acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="macro")
+    f1 = f1_score(y_test, y_pred, average="weighted")
 
     mlflow.log_metric("accuracy", acc)
-    mlflow.log_metric("macro_f1", f1)
+    mlflow.log_metric("f1_score", f1)
 
-    # ⬅️ LOG KE RUN ARTIFACTS
     mlflow.xgboost.log_model(model, artifact_path="model")
 
-    run_id = run.info.run_id
-
-# simpan run_id untuk CI
-with open("latest_run.txt", "w") as f:
-    f.write(run_id)
-
-print("RUN_ID:", run_id)
+    print("Training finished")
