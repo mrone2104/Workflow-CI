@@ -26,18 +26,17 @@ jobs:
           cd MLProject
           python modelling.py
 
-      # DEBUG (opsional tapi sangat disarankan untuk bukti & troubleshooting)
-      - name: Debug MLflow artifacts
+      # DEBUG (WAJIB SEKALI JALAN)
+      - name: Debug mlruns
         run: |
-          echo "=== TREE mlruns ==="
-          ls -R MLProject/mlruns || true
+          echo "=== TREE MLProject ==="
+          ls -R MLProject
 
-      # Ambil PATH MODEL NYATA (TANPA RUN_ID, TANPA runs:/)
       - name: Get model path
         run: |
           MODEL_PATH=$(find MLProject/mlruns -type d -name model | head -n 1)
-          echo "MODEL_PATH=$MODEL_PATH" >> $GITHUB_ENV
           echo "MODEL_PATH=$MODEL_PATH"
+          echo "MODEL_PATH=$MODEL_PATH" >> $GITHUB_ENV
           if [ -z "$MODEL_PATH" ]; then
             echo "MODEL_PATH not found"; exit 1;
           fi
