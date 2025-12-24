@@ -1,6 +1,6 @@
+import os
 import pandas as pd
 import mlflow
-import mlflow.xgboost
 import xgboost as xgb
 
 from sklearn.model_selection import train_test_split
@@ -18,7 +18,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-# 🔴 WAJIB
 with mlflow.start_run():
 
     model = xgb.XGBClassifier(
@@ -40,7 +39,11 @@ with mlflow.start_run():
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("f1_score", f1)
 
-    # 🔴 WAJIB artifact_path="model"
-    mlflow.xgboost.log_model(model, artifact_path="model")
+    # 🔴 SIMPAN MODEL KE FOLDER LOKAL
+    os.makedirs("model", exist_ok=True)
+    model.save_model("model/model.json")
 
-    print("Model logged successfully")
+    # 🔴 LOG SEBAGAI ARTIFACT (DIJAMIN MASUK mlruns)
+    mlflow.log_artifacts("model", artifact_path="model")
+
+    print("Model saved & logged as artifact")
