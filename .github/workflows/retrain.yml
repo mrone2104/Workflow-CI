@@ -1,4 +1,4 @@
-name: Retrain & Build Docker (MLflow Project)
+name: Retrain & Build Docker (CI)
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
+    # 1️⃣ Checkout repo
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -18,26 +18,28 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: "3.10"
 
-    # 3️⃣ Install MLflow & dependencies
+    # 3️⃣ Install dependencies
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install mlflow pandas scikit-learn xgboost matplotlib seaborn
 
-    # 4️⃣ Run MLflow Project (FIX ERROR CONDA)
-    - name: Run MLflow Project
+    # 4️⃣ Train model (TANPA mlflow run MLProject)
+    - name: Train model with MLflow
       run: |
-        mlflow run MLProject --env-manager local
+        cd MLProject
+        python modelling.py
 
     # 5️⃣ Login Docker Hub
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME}}
-        password: ${{ secrets.DOCKERHUB_TOKEN}}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    # 6️⃣ Build Docker Image via MLflow (ADVANCE)
+    # 6️⃣ Build Docker Image via MLflow
     - name: Build Docker Image with MLflow
       run: |
         mlflow models build-docker \
@@ -49,7 +51,7 @@ jobs:
       run: |
         docker push riskinanda/telco-offer-ml
 
-    # 8️⃣ Upload MLflow Artifacts (BUKTI CI)
+    # 8️⃣ Upload MLflow Artifacts (bukti CI)
     - name: Upload MLflow Artifacts
       uses: actions/upload-artifact@v4
       with:
