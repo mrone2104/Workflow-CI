@@ -1,11 +1,7 @@
-FROM python:3.10-slim
+name: retrain-ml-model
 
-WORKDIR /app
+conda_env: conda.yaml
 
-COPY MLProject/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY MLProject/modelling.py .
-COPY MLProject/data_preprocessed.csv .
-
-CMD ["python", "modelling.py"]
+entry_points:
+  main:
+    command: "python modelling.py"
