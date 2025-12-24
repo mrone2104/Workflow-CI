@@ -33,13 +33,10 @@ with mlflow.start_run():
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="weighted")
 
-    mlflow.log_metric("accuracy", acc)
-    mlflow.log_metric("f1_score", f1)
+    mlflow.log_metric("accuracy", accuracy_score(y_test, y_pred))
+    mlflow.log_metric("f1_score", f1_score(y_test, y_pred, average="weighted"))
 
-    # 🔴 INI YANG BENAR (WAJIB)
     mlflow.xgboost.log_model(model, artifact_path="model")
 
-    print("MLflow model saved correctly")
+print("Training finished")
