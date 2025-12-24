@@ -17,8 +17,7 @@ X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
 y = df["target_offer_encoded"].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
+    X, y,
     test_size=0.2,
     stratify=y,
     random_state=42
@@ -27,57 +26,42 @@ X_train, X_test, y_train, y_test = train_test_split(
 NUM_CLASS = y.nunique()
 
 # ======================================================
-# TRAIN MODEL (CI SAFE)
+# TRAIN + LOG (PASTI ADA ARTIFACT)
 # ======================================================
-model = xgb.XGBClassifier(
-    n_estimators=200,
-    max_depth=7,
-    learning_rate=0.05,
-    objective="multi:softprob",
-    num_class=NUM_CLASS,
-    eval_metric="mlogloss",
-    random_state=42
-)
+with mlflow.start_run():
 
-model.fit(X_train, y_train)
+    model = xgb.XGBClassifier(
+        n_estimators=200,
+        max_depth=7,
+        learning_rate=0.05,
+        objective="multi:softprob",
+        num_class=NUM_CLASS,
+        eval_metric="mlogloss",
+        random_state=42
+    )
 
-# ======================================================
-# EVALUATION
-# ======================================================
-y_pred = model.predict(X_test)
-acc = accuracy_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred, average="macro")
+    model.fit(X_train, y_train)
 
-# ======================================================
-# LOG TO MLFLOW (AUTO RUN)
-# ======================================================
-mlflow.log_metric("accuracy", acc)
-mlflow.log_metric("macro_f1", f1)
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average="macro")
 
-mlflow.xgboost.log_model(
-    model,
-    artifact_path="model"
-)
+    mlflow.log_metric("accuracy", acc)
+    mlflow.log_metric("macro_f1", f1)
 
-print("=== TRAINING SELESAI ===")
-print(f"Accuracy : {acc:.4f}")
-print(f"Macro F1 : {f1:.4f}")
+    # 🔴 INI KUNCI UTAMA
+    mlflow.xgboost.log_model(
+        model,
+        artifact_path="model"
+    )
+
+    run_id = mlflow.active_run().info.run_id
 
 # ======================================================
-# SIMPAN RUN_ID TERBARU (UNTUK CI)
+# SIMPAN RUN_ID TERBARU
 # ======================================================
-client = MlflowClient()
-experiment = client.get_experiment_by_name("Default")
-
-runs = client.search_runs(
-    experiment_ids=[experiment.experiment_id],
-    order_by=["attributes.start_time DESC"],
-    max_results=1
-)
-
-latest_run_id = runs[0].info.run_id
-
 with open("latest_run.txt", "w") as f:
-    f.write(latest_run_id)
+    f.write(run_id)
 
-print("Latest RUN_ID saved:", latest_run_id)
+print("RUN_ID:", run_id)
+print("Training selesai & model tersimpan")
