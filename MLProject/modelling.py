@@ -6,9 +6,7 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# =====================
-# Load data (preprocessed)
-# =====================
+# Load data
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -21,32 +19,27 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-# =====================
-# MLflow Training
-# =====================
-with mlflow.start_run(nested=True):
+# Model
+model = xgb.XGBClassifier(
+    n_estimators=200,
+    max_depth=7,
+    learning_rate=0.05,
+    objective="multi:softprob",
+    num_class=NUM_CLASS,
+    eval_metric="mlogloss",
+    random_state=42
+)
 
-    model = xgb.XGBClassifier(
-        n_estimators=200,
-        max_depth=7,
-        learning_rate=0.05,
-        objective="multi:softprob",
-        num_class=NUM_CLASS,
-        eval_metric="mlogloss",
-        random_state=42
-    )
+model.fit(X_train, y_train)
 
-    model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
 
-    y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred, average="weighted")
 
-    acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="weighted")
+mlflow.log_metric("accuracy", acc)
+mlflow.log_metric("f1_score", f1)
 
-    mlflow.log_metric("accuracy", acc)
-    mlflow.log_metric("f1_score", f1)
+mlflow.xgboost.log_model(model, artifact_path="model")
 
-    mlflow.xgboost.log_model(model, artifact_path="model")
-
-    print("Training finished")
-
+print("Training finished")
