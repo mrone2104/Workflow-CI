@@ -9,11 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Conda
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -21,14 +19,19 @@ jobs:
           activate-environment: mlflow-env
           auto-activate-base: false
 
-      # 3. Run MLflow Project
+      # 🔴 INI YANG KURANG DI PUNYAMU
+      - name: Set MLflow Tracking to DagsHub
+        run: |
+          echo "MLFLOW_TRACKING_URI=https://dagshub.com/mrone2104/telco-offer-mlflow.mlflow" >> $GITHUB_ENV
+          echo "MLFLOW_TRACKING_USERNAME=${{ secrets.DAGSHUB_USERNAME }}" >> $GITHUB_ENV
+          echo "MLFLOW_TRACKING_PASSWORD=${{ secrets.DAGSHUB_TOKEN }}" >> $GITHUB_ENV
+
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
           cd MLProject
           mlflow run .
 
-      # 4. Login Docker Hub
       - name: Login Docker Hub
         shell: bash -l {0}
         run: |
@@ -36,7 +39,6 @@ jobs:
             -u "${{ secrets.DOCKERHUB_USERNAME }}" \
             --password-stdin
 
-      # 5. Build Docker Image (PAKAI RUN_ID)
       - name: Build Docker Image
         shell: bash -l {0}
         run: |
@@ -46,7 +48,6 @@ jobs:
             -m runs:/$RUN_ID/model \
             -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
 
-      # 6. Push Docker Image
       - name: Push Docker Image
         shell: bash -l {0}
         run: |
