@@ -1,12 +1,13 @@
 name: mlflow-env
+
 channels:
   - conda-forge
+
 dependencies:
-  - python=3.9
+  - python=3.10
   - pip
   - pip:
       - mlflow
+      - pandas
       - scikit-learn
       - xgboost
-      - pandas
-      - numpy
