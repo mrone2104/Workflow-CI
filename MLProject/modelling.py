@@ -7,19 +7,17 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# ==========================================
-# DETEKSI MODE: LOCAL vs MLFLOW PROJECT
-# ==========================================
-IS_PROJECT = os.environ.get("MLFLOW_RUN_ID") is not None
 
-if not IS_PROJECT:
-    # HANYA untuk VS Code / manual
-    mlflow.set_tracking_uri("file:./mlruns")
-    mlflow.set_experiment("Telco_Offer_Basic")
+# ======================================================
+# INFORMASI TRACKING (UNTUK DEBUG & BUKTI)
+# ======================================================
+print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
+print("MLFLOW_EXPERIMENT =", mlflow.get_experiment_by_name("Telco_Offer"))
 
-# ==========================================
+
+# ======================================================
 # LOAD DATA
-# ==========================================
+# ======================================================
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -27,15 +25,20 @@ X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
 y = df["target_offer_encoded"].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+    X,
+    y,
+    test_size=0.2,
+    stratify=y,
+    random_state=42
 )
 
 NUM_CLASS = y.nunique()
 
-# ==========================================
-# TRAINING
-# ==========================================
-with mlflow.start_run(run_name=None if IS_PROJECT else "XGBoost_Basic"):
+
+# ======================================================
+# TRAINING & LOGGING
+# ======================================================
+with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
 
     model = xgb.XGBClassifier(
         n_estimators=200,
@@ -49,17 +52,36 @@ with mlflow.start_run(run_name=None if IS_PROJECT else "XGBoost_Basic"):
 
     model.fit(X_train, y_train)
 
+    # ======================
+    # EVALUATION
+    # ======================
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="macro")
 
+    # ======================
+    # LOGGING
+    # ======================
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
-    mlflow.xgboost.log_model(model, artifact_path="model")
+    mlflow.log_param("n_estimators", 200)
+    mlflow.log_param("max_depth", 7)
+    mlflow.log_param("learning_rate", 0.05)
 
+    mlflow.xgboost.log_model(
+        model,
+        artifact_path="model"
+    )
+
+    # ======================
+    # SIMPAN RUN ID (UNTUK DOCKER BUILD)
+    # ======================
     run_id = mlflow.active_run().info.run_id
     with open("run_id.txt", "w") as f:
         f.write(run_id)
+
+    print("RUN_ID =", run_id)
+
 
 print("TRAINING SELESAI")
