@@ -38,9 +38,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image (MLflow)
+        env:
+          MLFLOW_TRACKING_URI: file:./MLProject/mlruns
         run: |
           mlflow models build-docker \
-            -m MLProject/mlruns/0/$RUN_ID/artifacts/model \
+            -m runs:/$RUN_ID/model \
             -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml:latest
 
       - name: Push Docker image
