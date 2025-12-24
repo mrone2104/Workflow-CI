@@ -6,7 +6,7 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# Load data
+# Load data (preprocessed)
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -19,7 +19,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-# Model
 model = xgb.XGBClassifier(
     n_estimators=200,
     max_depth=7,
@@ -33,13 +32,13 @@ model = xgb.XGBClassifier(
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
-
 acc = accuracy_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred, average="weighted")
 
 mlflow.log_metric("accuracy", acc)
 mlflow.log_metric("f1_score", f1)
 
+# PENTING: artifact_path HARUS "model"
 mlflow.xgboost.log_model(model, artifact_path="model")
 
-print("Training finished")
+print("Training finished & model logged")
