@@ -46,11 +46,12 @@ jobs:
     - name: Debug MLflow artifacts
       run: |
         echo "=== ROOT ==="
+        pwd
         ls -la
         echo "=== MLProject ==="
         ls -la MLProject
         echo "=== mlruns ==="
-        ls -R MLProject/mlruns
+        ls -R MLProject/mlruns || echo "mlruns tidak ditemukan"
 
     # ===============================
     # Login Docker Hub
@@ -78,7 +79,7 @@ jobs:
         docker push riskinanda/telco-offer-ml
 
     # ===============================
-    # Upload MLflow Artifacts
+    # Upload MLflow Artifacts (bukti CI)
     # ===============================
     - name: Upload MLflow Artifacts
       uses: actions/upload-artifact@v4
