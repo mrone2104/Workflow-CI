@@ -9,10 +9,17 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 # ======================================================
+# SET EXPERIMENT (INI KUNCI FIX ERROR 404)
+# ======================================================
+EXPERIMENT_NAME = "Telco_Offer"
+mlflow.set_experiment(EXPERIMENT_NAME)
+
+
+# ======================================================
 # INFORMASI TRACKING (UNTUK DEBUG & BUKTI)
 # ======================================================
 print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
-print("MLFLOW_EXPERIMENT =", mlflow.get_experiment_by_name("Telco_Offer"))
+print("MLFLOW_EXPERIMENT =", mlflow.get_experiment_by_name(EXPERIMENT_NAME))
 
 
 # ======================================================
@@ -60,15 +67,21 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
     f1 = f1_score(y_test, y_pred, average="macro")
 
     # ======================
-    # LOGGING
+    # LOGGING METRICS
     # ======================
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
+    # ======================
+    # LOGGING PARAMETERS
+    # ======================
     mlflow.log_param("n_estimators", 200)
     mlflow.log_param("max_depth", 7)
     mlflow.log_param("learning_rate", 0.05)
 
+    # ======================
+    # LOGGING MODEL
+    # ======================
     mlflow.xgboost.log_model(
         model,
         artifact_path="model"
@@ -82,6 +95,8 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
         f.write(run_id)
 
     print("RUN_ID =", run_id)
+    print(f"Accuracy = {acc:.4f}")
+    print(f"Macro F1 = {f1:.4f}")
 
 
 print("TRAINING SELESAI")
