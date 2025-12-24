@@ -16,19 +16,10 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        pip install mlflow pandas scikit-learn xgboost
-
     - name: Train model
       run: |
         cd MLProject
         python modelling.py
-
-    - name: Read run id
-      run: |
-        RUN_ID=$(cat MLProject/latest_run.txt)
-        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
     - name: Login Docker Hub
       uses: docker/login-action@v3
@@ -38,9 +29,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        mlflow models build-docker \
-          -m runs:/$RUN_ID/model \
-          -n riskinanda/telco-offer-ml
+        docker build -t riskinanda/telco-offer-ml ./MLProject
 
     - name: Push Docker Image
       run: |
