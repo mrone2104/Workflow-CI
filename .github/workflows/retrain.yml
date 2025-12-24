@@ -41,17 +41,16 @@ jobs:
         python modelling.py
 
     # ===============================
-    # DEBUG: cek lokasi mlruns
+    # DEBUG (opsional, boleh dihapus nanti)
     # ===============================
-    - name: Debug MLflow artifacts
+    - name: Debug MLflow structure
       run: |
         echo "=== ROOT ==="
         pwd
-        ls -la
         echo "=== MLProject ==="
         ls -la MLProject
         echo "=== mlruns ==="
-        ls -R MLProject/mlruns || echo "mlruns tidak ditemukan"
+        ls -R MLProject/mlruns
 
     # ===============================
     # Login Docker Hub
@@ -63,12 +62,12 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # ===============================
-    # Build Docker Image (AUTO latest)
+    # Build Docker Image (FROM MODEL REGISTRY)
     # ===============================
     - name: Build Docker Image with MLflow
       run: |
         mlflow models build-docker \
-          -m MLProject/mlruns/*/*/artifacts/model \
+          -m MLProject/mlruns/0/models/m-9b7809ca242e451aa039c8df628ab729/artifacts \
           -n riskinanda/telco-offer-ml
 
     # ===============================
