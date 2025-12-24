@@ -28,25 +28,16 @@ jobs:
         cd MLProject
         python modelling.py
 
-    # 🔍 DEBUG (boleh dihapus setelah hijau)
-    - name: Debug MLruns structure
+    - name: Read latest MLflow run id
       run: |
-        ls -R MLProject/mlruns
-
-    # 🔑 AMBIL EXP_ID & RUN_ID DARI STRUKTUR ASLI
-    - name: Get latest run id
-      run: |
-        EXP_ID=$(ls MLProject/mlruns | grep -v models | grep -v trash | head -1)
-        RUN_ID=$(ls MLProject/mlruns/$EXP_ID | head -1)
-        echo "EXP_ID=$EXP_ID" >> $GITHUB_ENV
+        RUN_ID=$(cat MLProject/latest_run.txt)
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-        echo "Experiment: $EXP_ID"
-        echo "Run: $RUN_ID"
+        echo "RUN_ID = $RUN_ID"
 
     - name: Build Docker Image with MLflow
       run: |
         mlflow models build-docker \
-          -m MLProject/mlruns/$EXP_ID/$RUN_ID/artifacts/model \
+          -m MLProject/mlruns/0/$RUN_ID/artifacts/model \
           -n riskinanda/telco-offer-ml
 
     - name: Login to Docker Hub
