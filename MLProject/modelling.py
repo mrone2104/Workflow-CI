@@ -5,7 +5,6 @@ import xgboost as xgb
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
-from mlflow.tracking import MlflowClient
 
 # ======================================================
 # LOAD DATA
@@ -17,7 +16,8 @@ X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
 y = df["target_offer_encoded"].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
+    X,
+    y,
     test_size=0.2,
     stratify=y,
     random_state=42
@@ -26,7 +26,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 NUM_CLASS = y.nunique()
 
 # ======================================================
-# TRAIN + LOG (PASTI ADA ARTIFACT)
+# TRAIN + LOG MODEL (PASTI ADA artifacts/model)
 # ======================================================
 with mlflow.start_run():
 
@@ -49,7 +49,7 @@ with mlflow.start_run():
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
-    # 🔴 INI KUNCI UTAMA
+    # 🔴 WAJIB agar build-docker BERHASIL
     mlflow.xgboost.log_model(
         model,
         artifact_path="model"
@@ -58,10 +58,12 @@ with mlflow.start_run():
     run_id = mlflow.active_run().info.run_id
 
 # ======================================================
-# SIMPAN RUN_ID TERBARU
+# SIMPAN RUN_ID TERBARU (UNTUK CI)
 # ======================================================
 with open("latest_run.txt", "w") as f:
     f.write(run_id)
 
-print("RUN_ID:", run_id)
-print("Training selesai & model tersimpan")
+print("=== TRAINING SELESAI ===")
+print("RUN_ID   :", run_id)
+print(f"Accuracy : {acc:.4f}")
+print(f"Macro F1 : {f1:.4f}")
