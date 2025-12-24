@@ -1,16 +1,7 @@
-FROM python:3.10-slim
+name: telco-offer-ml
 
-WORKDIR /app
+conda_env: conda.yaml
 
-# Copy file training & data
-COPY modelling.py data_preprocessed.csv ./
-
-# Install dependencies
-RUN pip install --no-cache-dir \
-    mlflow \
-    pandas \
-    scikit-learn \
-    xgboost
-
-# Jalankan retraining saat container dijalankan
-CMD ["python", "modelling.py"]
+entry_points:
+  main:
+    command: "python modelling.py"
