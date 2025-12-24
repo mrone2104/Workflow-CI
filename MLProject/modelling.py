@@ -24,7 +24,7 @@ NUM_CLASS = y.nunique()
 # =====================
 # MLflow Training
 # =====================
-with mlflow.start_run():
+with mlflow.start_run(nested=True):
 
     model = xgb.XGBClassifier(
         n_estimators=200,
@@ -49,3 +49,4 @@ with mlflow.start_run():
     mlflow.xgboost.log_model(model, artifact_path="model")
 
     print("Training finished")
+
