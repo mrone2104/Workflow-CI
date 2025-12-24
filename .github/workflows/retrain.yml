@@ -17,20 +17,14 @@ jobs:
           activate-environment: mlflow-env
           auto-activate-base: false
 
-      # 🔑 AUTH DAGSHUB (BENAR & FINAL)
-      - name: Set MLflow Tracking to DagsHub
-        run: |
-          echo "MLFLOW_TRACKING_URI=https://dagshub.com/mrone2104/telco-offer-mlflow.mlflow" >> $GITHUB_ENV
-          echo "MLFLOW_TRACKING_USERNAME=dagshub" >> $GITHUB_ENV
-          echo "MLFLOW_TRACKING_PASSWORD=${{ secrets.DAGSHUB_TOKEN }}" >> $GITHUB_ENV
-
-      # 🔴 JANGAN mlflow run .
+      # TRAIN MODEL (NO MLFLOW)
       - name: Train Model
         shell: bash -l {0}
         run: |
           cd MLProject
           python modelling.py
 
+      # LOGIN DOCKER
       - name: Login Docker Hub
         shell: bash -l {0}
         run: |
@@ -38,16 +32,12 @@ jobs:
             -u "${{ secrets.DOCKERHUB_USERNAME }}" \
             --password-stdin
 
+      # BUILD DOCKER
       - name: Build Docker Image
-        shell: bash -l {0}
         run: |
-          cd MLProject
-          RUN_ID=$(cat run_id.txt)
-          mlflow models build-docker \
-            -m runs:/$RUN_ID/model \
-            -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml .
 
+      # PUSH DOCKER
       - name: Push Docker Image
-        shell: bash -l {0}
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml
