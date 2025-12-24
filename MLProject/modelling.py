@@ -6,7 +6,6 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 
-# Load data
 df = pd.read_csv("data_preprocessed.csv")
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
@@ -19,7 +18,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 NUM_CLASS = y.nunique()
 
-# 🔴 WAJIB ADA karena script dijalankan langsung
+# 🔴 WAJIB
 with mlflow.start_run():
 
     model = xgb.XGBClassifier(
@@ -41,7 +40,7 @@ with mlflow.start_run():
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("f1_score", f1)
 
-    # 🔴 artifact_path HARUS "model"
+    # 🔴 WAJIB artifact_path="model"
     mlflow.xgboost.log_model(model, artifact_path="model")
 
     print("Model logged successfully")
