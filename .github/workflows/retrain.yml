@@ -10,37 +10,77 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # =========================
+      # 1. CHECKOUT CODE
+      # =========================
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      # =========================
+      # 2. SETUP PYTHON
+      # =========================
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # =========================
+      # 3. INSTALL DEPENDENCIES
+      # =========================
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install mlflow pandas scikit-learn xgboost
 
-      # RETRAIN MODEL
-      - name: Retrain model
+      # =========================
+      # 4. RETRAIN MODEL (MLFLOW)
+      # =========================
+      - name: Retrain model with MLflow Project
         run: |
           cd MLProject
           export MLFLOW_TRACKING_URI=file:$(pwd)/mlruns
-          python modelling.py
+          mlflow run . --env-manager=local
 
-      # LOGIN DOCKER
+      # =========================
+      # 5. COMMIT MLFLOW ARTIFACTS
+      # (SKILLED – 3 POIN)
+      # =========================
+      - name: Save MLflow artifacts to repository
+        run: |
+          cd MLProject
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add mlruns
+          git commit -m "Save MLflow artifacts [CI]" || echo "No changes to commit"
+          git push
+
+      # =========================
+      # 6. LOGIN DOCKER HUB
+      # =========================
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # BUILD DOCKER IMAGE (DOCKERFILE)
-      - name: Build Docker image
+      # =========================
+      # 7. BUILD DOCKER IMAGE
+      # (ADVANCE – 4 POIN)
+      # =========================
+      - name: Build Docker image with MLflow
+        env:
+          MLFLOW_TRACKING_URI: file:./MLProject/mlruns
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml:latest MLProject
+          RUN_ID=$(ls MLProject/mlruns/0 | head -n 1)
+          echo "Using RUN_ID=$RUN_ID"
 
-      # PUSH DOCKER IMAGE
+          mlflow models build-docker \
+            -m runs:/$RUN_ID/model \
+            -n ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml:latest
+
+      # =========================
+      # 8. PUSH DOCKER IMAGE
+      # =========================
       - name: Push Docker image
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/telco-offer-ml:latest
