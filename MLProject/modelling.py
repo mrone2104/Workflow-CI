@@ -5,6 +5,7 @@ import xgboost as xgb
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
+from mlflow.tracking import MlflowClient
 
 # ======================================================
 # LOAD DATA
@@ -48,7 +49,7 @@ acc = accuracy_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred, average="macro")
 
 # ======================================================
-# LOG TO MLFLOW (TANPA start_run)
+# LOG TO MLFLOW (AUTO RUN)
 # ======================================================
 mlflow.log_metric("accuracy", acc)
 mlflow.log_metric("macro_f1", f1)
@@ -61,3 +62,22 @@ mlflow.xgboost.log_model(
 print("=== TRAINING SELESAI ===")
 print(f"Accuracy : {acc:.4f}")
 print(f"Macro F1 : {f1:.4f}")
+
+# ======================================================
+# SIMPAN RUN_ID TERBARU (UNTUK CI)
+# ======================================================
+client = MlflowClient()
+experiment = client.get_experiment_by_name("Default")
+
+runs = client.search_runs(
+    experiment_ids=[experiment.experiment_id],
+    order_by=["attributes.start_time DESC"],
+    max_results=1
+)
+
+latest_run_id = runs[0].info.run_id
+
+with open("latest_run.txt", "w") as f:
+    f.write(latest_run_id)
+
+print("Latest RUN_ID saved:", latest_run_id)
