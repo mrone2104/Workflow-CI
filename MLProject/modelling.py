@@ -10,7 +10,8 @@ from sklearn.metrics import accuracy_score, f1_score
 # ======================================================
 # LOAD DATA
 # ======================================================
-df = pd.read_csv("data_preprocessed.csv")
+DATA_PATH = "data_preprocessed.csv"
+df = pd.read_csv(DATA_PATH)
 
 DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
@@ -28,7 +29,7 @@ NUM_CLASS = y.nunique()
 
 
 # ======================================================
-# START RUN (WAJIB UNTUK MLFLOW PROJECT)
+# TRAIN & LOG WITH MLFLOW (STABLE MODE)
 # ======================================================
 with mlflow.start_run():
 
@@ -51,8 +52,12 @@ with mlflow.start_run():
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
-    # WAJIB agar bisa build docker
-    mlflow.xgboost.log_model(model, artifact_path="model")
+    # WAJIB agar bisa build docker image
+    mlflow.xgboost.log_model(
+        model,
+        artifact_path="model"
+    )
 
-    print("Accuracy :", acc)
-    print("Macro F1 :", f1)
+    print("=== TRAINING SELESAI ===")
+    print(f"Accuracy : {acc:.4f}")
+    print(f"Macro F1 : {f1:.4f}")
