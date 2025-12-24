@@ -21,18 +21,26 @@ jobs:
           pip install --upgrade pip
           pip install mlflow pandas scikit-learn xgboost
 
+      # =====================
+      # RETRAIN (KUNCI)
+      # =====================
       - name: Retrain model
-        env:
-          MLFLOW_TRACKING_URI: file:./mlruns
         run: |
           cd MLProject
+          export MLFLOW_TRACKING_URI=file:$(pwd)/mlruns
           python modelling.py
 
+      # =====================
+      # DEBUG (BUKTI)
+      # =====================
       - name: Debug mlruns
         run: |
           echo "=== TREE MLProject ==="
           ls -R MLProject
 
+      # =====================
+      # AMBIL MODEL PATH
+      # =====================
       - name: Get model path
         run: |
           MODEL_PATH=$(find MLProject/mlruns -type d -name model | head -n 1)
@@ -42,6 +50,9 @@ jobs:
             echo "MODEL_PATH not found"; exit 1;
           fi
 
+      # =====================
+      # DOCKER
+      # =====================
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
