@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import mlflow
 import mlflow.xgboost
@@ -9,27 +8,9 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 # ======================================================
-# SET / CREATE EXPERIMENT (FIX 404 DAGSHUB)
-# ======================================================
-EXPERIMENT_NAME = "Telco_Offer"
-
-client = mlflow.tracking.MlflowClient()
-experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
-
-if experiment is None:
-    exp_id = client.create_experiment(EXPERIMENT_NAME)
-else:
-    exp_id = experiment.experiment_id
-
-mlflow.set_experiment(EXPERIMENT_NAME)
-
-
-# ======================================================
-# DEBUG INFO
+# DEBUG TRACKING (BUKTI)
 # ======================================================
 print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
-print("EXPERIMENT_NAME =", EXPERIMENT_NAME)
-print("EXPERIMENT_ID =", exp_id)
 
 
 # ======================================================
@@ -53,7 +34,7 @@ NUM_CLASS = y.nunique()
 
 
 # ======================================================
-# TRAINING & LOGGING
+# TRAINING & LOGGING (DEFAULT EXPERIMENT)
 # ======================================================
 with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
 
@@ -69,16 +50,10 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
 
     model.fit(X_train, y_train)
 
-    # ======================
-    # EVALUATION
-    # ======================
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="macro")
 
-    # ======================
-    # LOGGING
-    # ======================
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
@@ -88,9 +63,6 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
 
     mlflow.xgboost.log_model(model, artifact_path="model")
 
-    # ======================
-    # SAVE RUN ID
-    # ======================
     run_id = mlflow.active_run().info.run_id
     with open("run_id.txt", "w") as f:
         f.write(run_id)
