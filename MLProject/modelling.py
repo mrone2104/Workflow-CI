@@ -9,17 +9,27 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 # ======================================================
-# SET EXPERIMENT (INI KUNCI FIX ERROR 404)
+# SET / CREATE EXPERIMENT (FIX 404 DAGSHUB)
 # ======================================================
 EXPERIMENT_NAME = "Telco_Offer"
+
+client = mlflow.tracking.MlflowClient()
+experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
+
+if experiment is None:
+    exp_id = client.create_experiment(EXPERIMENT_NAME)
+else:
+    exp_id = experiment.experiment_id
+
 mlflow.set_experiment(EXPERIMENT_NAME)
 
 
 # ======================================================
-# INFORMASI TRACKING (UNTUK DEBUG & BUKTI)
+# DEBUG INFO
 # ======================================================
 print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
-print("MLFLOW_EXPERIMENT =", mlflow.get_experiment_by_name(EXPERIMENT_NAME))
+print("EXPERIMENT_NAME =", EXPERIMENT_NAME)
+print("EXPERIMENT_ID =", exp_id)
 
 
 # ======================================================
@@ -67,36 +77,24 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
     f1 = f1_score(y_test, y_pred, average="macro")
 
     # ======================
-    # LOGGING METRICS
+    # LOGGING
     # ======================
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("macro_f1", f1)
 
-    # ======================
-    # LOGGING PARAMETERS
-    # ======================
     mlflow.log_param("n_estimators", 200)
     mlflow.log_param("max_depth", 7)
     mlflow.log_param("learning_rate", 0.05)
 
-    # ======================
-    # LOGGING MODEL
-    # ======================
-    mlflow.xgboost.log_model(
-        model,
-        artifact_path="model"
-    )
+    mlflow.xgboost.log_model(model, artifact_path="model")
 
     # ======================
-    # SIMPAN RUN ID (UNTUK DOCKER BUILD)
+    # SAVE RUN ID
     # ======================
     run_id = mlflow.active_run().info.run_id
     with open("run_id.txt", "w") as f:
         f.write(run_id)
 
     print("RUN_ID =", run_id)
-    print(f"Accuracy = {acc:.4f}")
-    print(f"Macro F1 = {f1:.4f}")
-
 
 print("TRAINING SELESAI")
