@@ -1,4 +1,4 @@
-name: retrain-ml-model
+name: telco-offer-training
 
 conda_env: conda.yaml
 
