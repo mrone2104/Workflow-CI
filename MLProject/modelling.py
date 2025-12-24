@@ -8,17 +8,23 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 # ======================================================
-# DEBUG TRACKING (BUKTI)
+# DEBUG TRACKING (BUKTI CI → DAGSHUB)
 # ======================================================
 print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
 
 
 # ======================================================
-# LOAD DATA
+# LOAD DATA (SAMA DENGAN VS CODE)
 # ======================================================
-df = pd.read_csv("data_preprocessed.csv")
+DATA_PATH = "data_preprocessed.csv"
+df = pd.read_csv(DATA_PATH)
 
-DROP_COLS = ["customer_id", "customer_id_encoded", "target_offer"]
+DROP_COLS = [
+    "customer_id",
+    "customer_id_encoded",
+    "target_offer"
+]
+
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns])
 y = df["target_offer_encoded"].astype(int)
 
@@ -36,7 +42,7 @@ NUM_CLASS = y.nunique()
 # ======================================================
 # TRAINING & LOGGING (DEFAULT EXPERIMENT)
 # ======================================================
-with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
+with mlflow.start_run(run_name="XGBoost_Basic"):
 
     model = xgb.XGBClassifier(
         n_estimators=200,
@@ -51,6 +57,7 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
+
     acc = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="macro")
 
@@ -61,12 +68,16 @@ with mlflow.start_run(run_name="XGBoost_Telco_Offer"):
     mlflow.log_param("max_depth", 7)
     mlflow.log_param("learning_rate", 0.05)
 
-    mlflow.xgboost.log_model(model, artifact_path="model")
+    mlflow.xgboost.log_model(
+        model,
+        artifact_path="model"
+    )
 
     run_id = mlflow.active_run().info.run_id
     with open("run_id.txt", "w") as f:
         f.write(run_id)
 
-    print("RUN_ID =", run_id)
-
-print("TRAINING SELESAI")
+    print("=== TRAINING SELESAI ===")
+    print("RUN_ID     :", run_id)
+    print(f"Accuracy   : {acc:.4f}")
+    print(f"Macro F1   : {f1:.4f}")
