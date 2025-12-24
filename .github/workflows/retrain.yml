@@ -22,7 +22,7 @@ jobs:
       # ✅ SET TRACKING DAGSHUB (CUKUP INI)
       - name: Set MLflow Tracking to DagsHub
         run: |
-          echo "MLFLOW_TRACKING_URI=https://dagshub.com/api/v1/mlflow/mrone2104/telco-offer-mlflow" >> $GITHUB_ENV
+          echo "MLFLOW_TRACKING_URI=https://dagshub.com/mrone2104/telco-offer-mlflow.mlflow" >> $GITHUB_ENV
           echo "MLFLOW_TRACKING_USERNAME=${{ secrets.DAGSHUB_USERNAME }}" >> $GITHUB_ENV
           echo "MLFLOW_TRACKING_PASSWORD=${{ secrets.DAGSHUB_TOKEN }}" >> $GITHUB_ENV
 
