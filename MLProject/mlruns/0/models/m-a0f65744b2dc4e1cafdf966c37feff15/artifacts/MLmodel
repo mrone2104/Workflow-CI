@@ -1,0 +1,50 @@
+artifact_path: file:///home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/models/m-a0f65744b2dc4e1cafdf966c37feff15/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.10.19
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: ubj
+    xgb_version: 3.1.2
+is_signature_from_type_hint: false
+mlflow_version: 3.8.0
+model_id: m-a0f65744b2dc4e1cafdf966c37feff15
+model_size_bytes: 1452206
+model_uuid: m-a0f65744b2dc4e1cafdf966c37feff15
+prompts: null
+run_id: 61066718dfd0426d931412759ef380eb
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "plan_type", "required": true}, {"type": "long",
+    "name": "device_brand", "required": true}, {"type": "double", "name": "avg_data_usage_gb",
+    "required": true}, {"type": "double", "name": "pct_video_usage", "required": true},
+    {"type": "double", "name": "avg_call_duration", "required": true}, {"type": "double",
+    "name": "sms_freq", "required": true}, {"type": "double", "name": "monthly_spend",
+    "required": true}, {"type": "double", "name": "topup_freq", "required": true},
+    {"type": "double", "name": "travel_score", "required": true}, {"type": "double",
+    "name": "complaint_count", "required": true}, {"type": "long", "name": "target_offer_encoded",
+    "required": true}, {"type": "long", "name": "plan_type_encoded", "required": true},
+    {"type": "long", "name": "device_brand_encoded", "required": true}, {"type": "double",
+    "name": "plan_type_Postpaid", "required": true}, {"type": "double", "name": "plan_type_Prepaid",
+    "required": true}, {"type": "double", "name": "device_brand_Apple", "required":
+    true}, {"type": "double", "name": "device_brand_Huawei", "required": true}, {"type":
+    "double", "name": "device_brand_Oppo", "required": true}, {"type": "double", "name":
+    "device_brand_Realme", "required": true}, {"type": "double", "name": "device_brand_Samsung",
+    "required": true}, {"type": "double", "name": "device_brand_Vivo", "required":
+    true}, {"type": "double", "name": "device_brand_Xiaomi", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1,
+    9]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-12-25 08:40:37.418073'
