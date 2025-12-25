@@ -11,7 +11,7 @@ jobs:
 
     steps:
       # =========================
-      # 1. CHECKOUT CODE
+      # 1. CHECKOUT REPOSITORY
       # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           pip install mlflow pandas scikit-learn xgboost
 
       # =========================
-      # 4. RETRAIN MODEL (MLFLOW)
+      # 4. RETRAIN MODEL (MLFLOW PROJECT)
       # =========================
       - name: Retrain model with MLflow Project
         run: |
@@ -42,8 +42,7 @@ jobs:
           mlflow run . --env-manager=local
 
       # =========================
-      # 5. COMMIT MLFLOW ARTIFACTS
-      # (SKILLED – 3 POIN)
+      # 5. SAVE MLFLOW ARTIFACTS (SKILLED)
       # =========================
       - name: Save MLflow artifacts to repository
         run: |
@@ -64,14 +63,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # =========================
-      # 7. BUILD DOCKER IMAGE
-      # (ADVANCE – 4 POIN)
+      # 7. BUILD DOCKER IMAGE (ADVANCE)
       # =========================
       - name: Build Docker image with MLflow
         env:
           MLFLOW_TRACKING_URI: file:./MLProject/mlruns
         run: |
-          RUN_ID=$(ls MLProject/mlruns/0 | head -n 1)
+          echo "Finding latest MLflow run..."
+          RUN_ID=$(ls -td MLProject/mlruns/0/* | head -n 1 | xargs basename)
           echo "Using RUN_ID=$RUN_ID"
 
           mlflow models build-docker \
