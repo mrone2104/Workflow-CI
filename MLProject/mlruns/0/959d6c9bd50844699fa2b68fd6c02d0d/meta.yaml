@@ -1,0 +1,14 @@
+artifact_uri: file:///home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/959d6c9bd50844699fa2b68fd6c02d0d/artifacts
+end_time: 1766727217098
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 959d6c9bd50844699fa2b68fd6c02d0d
+run_name: peaceful-newt-183
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1766727211895
+status: 3
+tags: []
+user_id: runner
