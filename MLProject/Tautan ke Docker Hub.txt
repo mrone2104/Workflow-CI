@@ -1,1 +1,1 @@
-
+https://hub.docker.com/repository/docker/riskinanda/telco-offer-ml/general
